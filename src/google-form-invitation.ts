@@ -1,8 +1,20 @@
 /**
  * フォーム送信時に実行される
- * @param e form event
+ * @param e Form submit event
  */
 function onFormSubmit(e) {
+  const response: GoogleAppsScript.Forms.FormResponse = e.response
+  const email = response.getRespondentEmail()
+  const date = getDate()
+  const calendarEvent = searchCalendarEvent(date)
+  calendarEvent.addGuest(email)
+}
+
+/**
+ * フォーム送信時に実行される
+ * @param e Spreadsheet Form submit event
+ */
+function onFormSubmitToSpreadSheet(e) {
   const range: GoogleAppsScript.Spreadsheet.Range = e.range
   const values: string[] = e.values
   const mailColumn = getMailColumn(range.getSheet())
@@ -51,10 +63,20 @@ function searchCalendarEvent(eventDay: Date): GoogleAppsScript.Calendar.Calendar
 }
 
 /**
- * トリガーを作成する
+ * Form にトリガーを作成する
  */
-function createTrigger() {
+function createFormTrigger() {
   ScriptApp.newTrigger('onFormSubmit')
+    .forForm(FormApp.getActiveForm())
+    .onFormSubmit()
+    .create()
+}
+
+/**
+ * Spreadsheet にトリガーを作成する
+ */
+function createSpreadsheetTrigger() {
+  ScriptApp.newTrigger('onFormSubmitToSpreadSheet')
     .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
     .onFormSubmit()
     .create()
